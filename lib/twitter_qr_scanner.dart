@@ -3,12 +3,9 @@ library twitter_qr_scanner;
 import 'dart:async';
 
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-
 
 typedef void QRViewCreatedCallback(QRViewController controller);
 
@@ -17,11 +14,9 @@ class QRView extends StatefulWidget {
     @required Key key,
     @required this.onQRViewCreated,
     @required this.data,
-    this.overlay,
     this.qrCodeBackgroundColor = Colors.blue,
     this.qrCodeForegroundColor = Colors.white,
     this.switchButtonColor = Colors.white,
-
   })  : assert(key != null),
         assert(onQRViewCreated != null),
         assert(data != null),
@@ -29,7 +24,6 @@ class QRView extends StatefulWidget {
 
   final QRViewCreatedCallback onQRViewCreated;
 
-  final ShapeBorder overlay;
   final String data;
   final Color qrCodeBackgroundColor;
   final Color qrCodeForegroundColor;
@@ -44,120 +38,11 @@ class _QRViewState extends State<QRView> {
   CarouselSlider slider;
   var flareAnimation = "view";
 
-  getSlider(){
-    setState(() {
-
-
-      slider = CarouselSlider(
-        height: MediaQuery.of(context).size.height,
-        viewportFraction: 1.0,
-        enableInfiniteScroll: false,
-        onPageChanged: (index) {
-          setState(() {
-            isScanMode = index == 0;
-            if(isScanMode) {
-              flareAnimation = "scanToView";
-            }else {
-              flareAnimation = "viewToScan";
-            }
-          });
-        },
-        items: [
-          Container(
-            alignment: Alignment.center,
-            decoration: ShapeDecoration(
-              shape: widget.overlay,
-            ),
-          ),
-          Container(
-            alignment: Alignment.center,
-            decoration: ShapeDecoration(
-              shape: widget.overlay,
-            ),
-            child: Container(
-              width: 240,
-              height: 240,
-              padding: EdgeInsets.all(21),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: widget.qrCodeBackgroundColor,
-              ),
-              child: QrImage(
-                data: widget.data,
-                version: QrVersions.auto,
-                foregroundColor: widget.qrCodeForegroundColor,
-                gapless: true,
-              ),
-            ),
-          ),
-        ],
-      );
-    });
-    return slider;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         _getPlatformQrView(),
-        widget.overlay != null
-            ? getSlider()
-            : Container(),
-        Align(
-          alignment: Alignment.topLeft,
-          child: SafeArea(
-              child: IconButton(
-                icon: Icon(
-                  Icons.clear,
-                  color: Colors.white70,
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              )),
-        ),
-        Positioned(
-          bottom: 16,
-          left: 0,
-          right: 0,
-          child: InkWell(
-
-            onTap: () {
-              setState(() {
-
-                isScanMode = !isScanMode;
-                if(isScanMode) {
-                  flareAnimation = "scanToView";
-                  slider?.previousPage(duration: Duration(milliseconds: 500),
-                      curve: Curves.linear);
-                }else {
-                  flareAnimation = "viewToScan";
-
-                  slider?.nextPage(duration: Duration(milliseconds: 500),
-                      curve: Curves.linear);
-                }
-              });
-            },
-            child: Container(
-              height: 48,
-              width: 48,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(255),
-              ),
-              child: ClipRRect(
-
-                borderRadius: BorderRadius.circular(255),
-                child: FlareActor("packages/twitter_qr_scanner/asset/QRButton.flr",
-                  alignment: Alignment.center,
-                  animation: flareAnimation,
-                  fit: BoxFit.contain,
-                  color: widget.switchButtonColor,
-                ),
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -186,7 +71,7 @@ class _QRViewState extends State<QRView> {
     return _platformQrView;
   }
 
-  void _onPlatformViewCreated(int id) async{
+  void _onPlatformViewCreated(int id) async {
     if (widget.onQRViewCreated == null) {
       return;
     }
@@ -232,7 +117,7 @@ class QRViewController {
           {"width": renderBox.size.width, "height": renderBox.size.height});
     }
     _channel.setMethodCallHandler(
-          (MethodCall call) async {
+      (MethodCall call) async {
         switch (call.method) {
           case scanMethodCall:
             if (call.arguments != null) {

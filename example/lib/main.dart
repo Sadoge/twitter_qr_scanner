@@ -16,16 +16,15 @@ class _MyAppState extends State<MyApp> {
       body: Center(
         child: RaisedButton(
           child: Text('Scan'),
-          onPressed: (){
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => QRExample()));
+          onPressed: () {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (context) => QRExample()));
           },
         ),
       ),
     );
   }
 }
-
-
 
 class QRExample extends StatefulWidget {
   QRExample({Key key, this.title}) : super(key: key);
@@ -49,18 +48,13 @@ class _QRExampleState extends State<QRExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.black,
-        body: QRView(
-          key: qrKey,
-          overlay: QrScannerOverlayShape(
-              borderRadius: 16,
-              borderColor: Colors.white,
-              borderLength: 120,
-              borderWidth: 10,
-              cutOutSize: 250),
-          onQRViewCreated: _onQRViewCreate,
-          data: "QR TEXT",
-        ));
+      backgroundColor: Colors.black,
+      body: QRView(
+        key: qrKey,
+        onQRViewCreated: _onQRViewCreate,
+        data: "QR TEXT",
+      ),
+    );
   }
 
   @override
